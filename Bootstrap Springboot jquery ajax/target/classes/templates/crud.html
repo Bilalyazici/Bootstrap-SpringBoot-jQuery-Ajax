@@ -1,0 +1,134 @@
+<!doctype html>
+<html>
+<head>
+    <title>Spring Boot AJAX jQuery CRUD</title>
+    <meta http-equiv="Content-Type" content="text/html;charset=utf-8"/>
+    <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-modal/0.9.1/jquery.modal.min.js"></script>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jquery-modal/0.9.1/jquery.modal.min.css" />
+    <style>
+        .modal p { margin: 1em 0; }
+
+        .add_form.modal {
+            border-radius: 0;
+            line-height: 18px;
+            padding: 0;
+            font-family: "Lucida Grande", Verdana, sans-serif;
+        }
+
+        .add_form.modal p { padding: 40px 30px; border-bottom: 1px solid #ddd; margin: 0;
+            background: -webkit-gradient(linear,left bottom,left top,color-stop(0, #eee),color-stop(1, #fff));
+            overflow: hidden;
+        }
+        .add_form.modal p:last-child { border: none; }
+        .add_form.modal p label { float: left; font-weight: bold; color: #333; font-size: 13px; width: 200px; line-height: 50px; }
+        .add_form.modal p input[type="text"],
+        .add_form.modal p input[type="submit"]		{
+            font: normal 12px/18px "Lucida Grande", Verdana;
+            padding: 3px;
+            border: 1px solid #ddd;
+            width: 200px;
+        }
+
+        #msg {
+            margin: 10px;
+            padding: 30px;
+            color: #fff;
+            font-size: 18px;
+            font-weight: bold;
+            background: -moz-linear-gradient(top, #2e5764, #1e3d47);
+            background: -webkit-gradient(linear,left bottom,left top,color-stop(0, #1e3d47),color-stop(1, #2e5764));
+        }
+    </style>
+    <script type="text/javascript">
+        $(document).ready(function() {
+            $.getJSON('http://localhost:9010/employee/getAll', function(json) {
+                var tr=[];
+                for (var i = 0; i < json.length; i++) {
+                    tr.push('<tr>');
+                    tr.push('<td>' + json[i].userId + '</td>');
+                    tr.push('<td>' + json[i].userName + '</td>');
+                    tr.push('<td>' + json[i].userLastname + '</td>');
+                    tr.push('</tr>');
+                }
+                $('table').append($(tr.join('')));
+            });
+
+            $(document).delegate('#addEmployee', 'click', function(event) {
+                event.preventDefault();
+                var userName = $('#userName').val();
+                var userLastname = $('#userLastname').val();
+
+
+                url = "http://localhost:9010/employee/addEmployee/"+userName+"/"+userLastname
+                $.ajax({
+                    type: "GET",
+                    contentType: "application/json; charset=utf-8",
+                    url: url,
+                    cache: false,
+                    success: function(result) {
+                        $("#msg").html( "<span style='color: green'>Company added successfully</span>" );
+                        window.setTimeout(function(){location.reload()},1000)
+                    },
+                    error: function(err) {
+                        $("#msg").html( "<span style='color: red'>Name is required</span>" );
+                    }
+                });
+            });
+
+            $(document).delegate('#save', 'click', function() {
+                var parent = $(this).parent().parent();
+                $.ajax({
+                    type: "GET",
+                    contentType: "application/json; charset=utf-8",
+                    url: "http://localhost:9010/employee/addEmployee",
+                    data: JSON.stringify({'userId' : userId.html(), 'userName' : userName.children("input[type=text]").val(),'userLastname' : userLastname.children("input[type=text]").val()}),
+                    cache: false,
+                    success: function() {
+                        userName.html(userName.children("input[type=text]").val());
+                        userLastname.html(userLastname.children("input[type=text]").val());
+                    },
+                    error: function() {
+                        $('#err').html('<span style=\'color:red; font-weight: bold; font-size: 30px;\'>Error updating record').fadeIn().fadeOut(4000, function() {
+                            $(this).remove();
+                        });
+                    }
+                });
+            });
+
+        });
+    </script>
+</head>
+<body>
+
+<h2>User List</h2>
+
+<p><a style="width: 300px; height: 50px; align:center" class='btn btn-secondary btn-sm' href="#add" rel="modal:open">Add a New User</a></p>
+<table border="3" cellspacing="0" cellpadding="15" width="50%" >
+    <tr>
+        <th>User Id</th>
+        <th>User Name</th>
+        <th>U Lastname</th>
+    </tr>
+</table>
+<form id="add" action="#" class="üü" style="display:none;">
+
+    <div id='msg'/>
+    <h3>Add a User</h3>
+    <p>
+        <label>User Name</label>
+        <label>User Lastname</label>
+        <input type="text" id="userName" name="userName">
+        <input type="text" id="userLastname" name="userLastname">
+    </p>
+    <p>
+        <input type="submit" id="addEmployee" value="Submit">
+    </p>
+</form>
+
+
+</body>
+</html>
+
